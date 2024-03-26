@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>Wetter Websockets</title>
+  </head>
+  <body>
+
+    <header class="header-container">
+      <h1>Wetter Websockets</h1>
+      <div id="test"></div>
+    </header>
+
+    <section class="section-container">
+      <div class="sections" id="eingabefeld">
+        <label for="cityInput">Stadt:</label>
+        <input type="text" id="cityInput" name="cityInput">
+    </section>
+
+    <section class="section-container">
+      <button class="button" id="buttonSearch">Search</button>
+    </section>
+
+    <section class="section-container">
+      <div class="sections" id="infos">
+    </section>
+
+    <footer class="footer-container">
+      <h4>Made by Michael Herrmann, Luca Dal Corso, Dominik Hartmann</h4>
+      <a href="https://github.com/NotMHX/wetter-websockets">GitHub</a>
+    </footer>
+    <script type="module" >
+
+const ws = new WebSocket("ws://localhost:8080");
+
+document.getElementById('buttonSearch').addEventListener("click", () => {
+
+  let cityname = document.getElementById('cityInput').value
+
+console.log(cityname)
+
+let example = {
+      type: "addLocation",
+      content: cityname
+    }
+
+    console.log(example)
+    ws.send(JSON.stringify(example));
+}
+
+);
+
+ws.addEventListener("message", e => {
+  console.log(`neue message: ${e}`);
+  const datas = JSON.parse(e.data);
+  console.log(datas)
+  document.getElementById("infos").innerHTML = ''
+  for (const data of datas) {
+    
+  document.getElementById("infos").innerHTML += `<p> In ${data.city}  At ${data.data.hourly.time[0]} the temperature is ${data.data.hourly.temperature_2m[0]}</p>`;
+
+}
+document.getElementById("infos").innerHTML +=  new Date().toLocaleTimeString();
+});
+    </script>
+  </body>
+</html>
