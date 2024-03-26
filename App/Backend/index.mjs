@@ -11,17 +11,15 @@ let newId = 0;
 wss.on("connection", async (ws) => {
   console.log("New client connected");
 
-
+  // show data on startup
   const data = await sendAllData();
-  console.log(data)
+  console.log(data);
   ws.send(JSON.stringify(data));
 
-  ws.on("message", (msg) => {
+  ws.on("message", (megString) => {
+    let location = JSON.parse(msg);
 
-    let location = JSON.parse(msg)
-
-
-    console.log(location)
+    console.log(location);
     switch (location.type) {
       case "login": // existiert noch nicht
         users.push({
@@ -33,7 +31,7 @@ wss.on("connection", async (ws) => {
         break;
 
       case "addLocation":
-        console.log("Here")
+        console.log("Here");
         cities.push(location.content);
         break;
 
@@ -49,14 +47,12 @@ wss.on("connection", async (ws) => {
     console.log("Client has disconnected");
   });
 
-
-
-
+  // update data every 10000 ms
   setInterval(async () => {
     const data = await sendAllData();
-    console.log(data)
+    console.log(data);
     ws.send(JSON.stringify(data));
-  }, 5000);
+  }, 10000);
 });
 
 async function getWeather(city) {
@@ -65,8 +61,6 @@ async function getWeather(city) {
   );
   const cityJson = await cityData.json();
   const cityJson2 = cityJson.results[0];
-
-
 
   let weatherData = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${cityJson2.latitude}&longitude=${cityJson2.longitude}&hourly=temperature_2m&timezone=Europe%2FBerlin&forecast_days=3`
@@ -91,7 +85,3 @@ async function sendAllData() {
   }
   return weatherCity;
 }
-
-(async function () {
-
-})(); // alle 10 sekunden

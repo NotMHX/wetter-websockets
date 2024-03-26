@@ -33,38 +33,34 @@
       <a href="https://github.com/NotMHX/wetter-websockets">GitHub</a>
     </footer>
     <script type="module" >
+      const ws = new WebSocket("ws://localhost:8080");
 
-const ws = new WebSocket("ws://localhost:8080");
+      document.getElementById('buttonSearch').addEventListener("click", () => {
 
-document.getElementById('buttonSearch').addEventListener("click", () => {
+        let cityname = document.getElementById('cityInput').value
 
-  let cityname = document.getElementById('cityInput').value
+      console.log(cityname);
 
-console.log(cityname)
+      let example = {
+            type: "addLocation",
+            content: cityname
+          }
 
-let example = {
-      type: "addLocation",
-      content: cityname
-    }
+          console.log(example)
+          ws.send(JSON.stringify(example));
+        });
 
-    console.log(example)
-    ws.send(JSON.stringify(example));
-}
-
-);
-
-ws.addEventListener("message", e => {
-  console.log(`neue message: ${e}`);
-  const datas = JSON.parse(e.data);
-  console.log(datas)
-  document.getElementById("infos").innerHTML = ''
-  for (const data of datas) {
-    
-  document.getElementById("infos").innerHTML += `<p> In ${data.city}  At ${data.data.hourly.time[0]} the temperature is ${data.data.hourly.temperature_2m[0]}</p>`;
-
-}
-document.getElementById("infos").innerHTML +=  new Date().toLocaleTimeString();
-});
+      ws.addEventListener("message", e => {
+        console.log(`neue message: ${e}`);
+        const datas = JSON.parse(e.data);
+        console.log(datas)
+        document.getElementById("infos").innerHTML = ''
+        for (const data of datas) {
+          
+        document.getElementById("infos").innerHTML += `<p> In ${data.city}  At ${data.data.hourly.time[0]} the temperature is ${data.data.hourly.temperature_2m[0]}</p>`;
+      }
+      document.getElementById("infos").innerHTML +=  new Date().toLocaleTimeString();
+      });
     </script>
   </body>
 </html>
