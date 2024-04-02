@@ -1,10 +1,15 @@
 import WebSocket, { WebSocketServer } from "ws";
 import fetch from "node-fetch";
 
+import { LocalStorage } from 'node-localstorage';
+
+// Erstelle eine Instanz von LocalStorage
+const localStorage = new LocalStorage('./scratch');
+
 const wss = new WebSocketServer({ port: 8080 });
 
 let users = [];
-let cities = ["Zürich", "Berlin", "Vladivostok", "Albuquerque"];
+let cities = JSON.parse(localStorage.getItem('cities')) || [];
 
 let newId = 0;
 
@@ -17,7 +22,7 @@ wss.on("connection", async (ws) => {
   ws.send(JSON.stringify(data));
 
   ws.on("message", (megString) => {
-    let location = JSON.parse(msg);
+    let location = JSON.parse(megString);
 
     console.log(location);
     switch (location.type) {
@@ -37,7 +42,7 @@ wss.on("connection", async (ws) => {
 
       default:
         console.log(
-          `error handling message of type ${msg.type} with content ${msg.content}`
+          `error handling message of type ${megString.type} with content ${megString.content}`
         );
         break;
     }
@@ -51,8 +56,10 @@ wss.on("connection", async (ws) => {
   setInterval(async () => {
     const data = await sendAllData();
     console.log(data);
+
+    localStorage.setItem(data.city, data.data)
     ws.send(JSON.stringify(data));
-  }, 10000);
+  }, 60000);
 });
 
 async function getWeather(city) {
