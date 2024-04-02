@@ -1,4 +1,6 @@
 # Weather Application with WebSockets
+Create a list of cities you want to receive the forecast of. The temperature updates every few seconds and is done on the server.
+
 ## Features
 - Frontend with raw JavaScript
 - Backend with Node.js
