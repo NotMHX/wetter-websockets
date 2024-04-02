@@ -1,50 +1,33 @@
 import WebSocket, { WebSocketServer } from "ws";
 import fetch from "node-fetch";
 
-import { LocalStorage } from 'node-localstorage';
-
-// Erstelle eine Instanz von LocalStorage
-const localStorage = new LocalStorage('./scratch');
-
 const wss = new WebSocketServer({ port: 8080 });
 
-let users = [];
-let cities = JSON.parse(localStorage.getItem('cities')) || [];
-
-let newId = 0;
+let cities = [];
 
 wss.on("connection", async (ws) => {
   console.log("New client connected");
 
   // show data on startup
-  const data = await sendAllData();
-  console.log(data);
-  ws.send(JSON.stringify(data));
+  sendAllData();
 
-  ws.on("message", (megString) => {
-    let location = JSON.parse(megString);
+  ws.on("message", async (msg) => {
+    console.log(msg);
+    sendAllData();
 
-    console.log(location);
-    switch (location.type) {
-      case "login": // existiert noch nicht
-        users.push({
-          id: newId,
-          name: location.content,
-        });
+    try {
+      let TestData = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${msg}&count=1&language=en&format=json`
+      );
+      const testJson = await TestData.json();
 
-        newId++;
-        break;
-
-      case "addLocation":
-        console.log("Here");
-        cities.push(location.content);
-        break;
-
-      default:
-        console.log(
-          `error handling message of type ${megString.type} with content ${megString.content}`
-        );
-        break;
+      console.log(testJson);
+      if (testJson != null) {
+        console.log("city exists");
+        cities.push(msg);
+      }
+    } catch (error) {
+      console.log("error");
     }
   });
 
@@ -52,14 +35,14 @@ wss.on("connection", async (ws) => {
     console.log("Client has disconnected");
   });
 
-  // update data every 10000 ms
-  setInterval(async () => {
-    const data = await sendAllData();
+  async function sendAllData() {
+    const data = await getAllData();
     console.log(data);
-
-    localStorage.setItem(data.city, data.data)
     ws.send(JSON.stringify(data));
-  }, 60000);
+  }
+
+  // update data every minute
+  setInterval(sendAllData, 60000);
 });
 
 async function getWeather(city) {
@@ -77,13 +60,14 @@ async function getWeather(city) {
   return weatherJson;
 }
 
-async function sendAllData() {
+async function getAllData() {
   let weatherCity = [];
   for (const city of cities) {
     try {
+      const cityString = JSON.parse(city);
       let cityWeatherObject = {
-        city: city,
-        data: await getWeather(city),
+        city: cityString,
+        data: await getWeather(cityString),
       };
       weatherCity.push(cityWeatherObject);
     } catch {
