@@ -13,7 +13,6 @@ wss.on("connection", async (ws) => {
 
   ws.on("message", async (msg) => {
     console.log(msg);
-    sendAllData();
 
     try {
       let TestData = await fetch(
@@ -29,6 +28,8 @@ wss.on("connection", async (ws) => {
     } catch (error) {
       console.log("error");
     }
+
+    sendAllData();
   });
 
   ws.on("close", () => {
