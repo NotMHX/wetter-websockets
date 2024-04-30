@@ -49,11 +49,10 @@
         const weatherList = document.getElementById("weatherList")
         weatherList.innerHTML = ''; // empty the list
 
-        let highestTemp = 0;
-        let lowestTemp = 100;
-
         for (const data of dataset) {
           // create elements
+          let highestTemp = 0;
+          let lowestTemp = 100;
           const weatherEntry = document.createElement('div');
           weatherEntry.className = "sections";
           const divCityName = document.createElement('h2');
